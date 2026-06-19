@@ -1,0 +1,207 @@
+<div class="dashboard-container">
+  <!-- Search Bar Component -->
+  <header class="dashboard-header">
+    <app-search-bar></app-search-bar>
+  </header>
+
+  <!-- Favorite Locations Component -->
+  <app-favorite-cities></app-favorite-cities>
+
+  <!-- Main Content Areas -->
+  @if (weatherService.isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Fetching latest weather data...</p>
+    </div>
+  } @else if (weatherService.errorMsg()) {
+    <div class="error-state">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-icon">
+        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p>{{ weatherService.errorMsg() }}</p>
+    </div>
+  } @else if (weatherService.currentWeather(); as weather) {
+    <main class="dashboard-content">
+      
+      <!-- City Detail Header with Favorite Star -->
+      <section class="city-header-section">
+        <div class="city-details">
+          <h1>{{ weatherService.currentCity()?.name }}</h1>
+          <p class="country-name">
+            @if (weatherService.currentCity()?.admin1) {
+              {{ weatherService.currentCity()?.admin1 }}, 
+            }
+            {{ weatherService.currentCity()?.country }}
+          </p>
+        </div>
+        
+        <button (click)="toggleFavorite()" class="favorite-toggle" [class.is-fav]="isCurrentFavorite()" title="Toggle Favorite">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          {{ isCurrentFavorite() ? 'Saved' : 'Save City' }}
+        </button>
+      </section>
+
+      <!-- Grid Layout for Current Weather and Details -->
+      <div class="weather-grid">
+        
+        <!-- Left Panel: Current Weather Summary -->
+        <div class="current-weather-panel glass-card">
+          <div class="main-info">
+            <span class="weather-emoji">{{ weatherInfo()?.icon }}</span>
+            <div class="temp-display">
+              <span class="temp-val">{{ Math.round(weather.current.temp) }}</span>
+              <span class="temp-unit">°C</span>
+            </div>
+            <p class="weather-description">{{ weatherInfo()?.description }}</p>
+          </div>
+          <div class="time-info">
+            <p class="local-time">{{ formatDate(weather.current.time) }}</p>
+          </div>
+        </div>
+
+        <!-- Right Panel: Weather Details Grid -->
+        <div class="details-panel-grid">
+          
+          <div class="detail-card glass-card">
+            <div class="detail-icon">🌡️</div>
+            <div class="detail-info">
+              <span class="detail-label">Feels Like</span>
+              <span class="detail-value">{{ Math.round(weather.current.apparentTemp) }}°C</span>
+            </div>
+          </div>
+
+          <div class="detail-card glass-card">
+            <div class="detail-icon">💧</div>
+            <div class="detail-info">
+              <span class="detail-label">Humidity</span>
+              <span class="detail-value">{{ weather.current.humidity }}%</span>
+            </div>
+          </div>
+
+          <div class="detail-card glass-card">
+            <div class="detail-icon">💨</div>
+            <div class="detail-info">
+              <span class="detail-label">Wind Speed</span>
+              <span class="detail-value">{{ weather.current.windSpeed }} km/h</span>
+            </div>
+          </div>
+
+          <div class="detail-card glass-card">
+            <div class="detail-icon">🌐</div>
+            <div class="detail-info">
+              <span class="detail-label">Pressure</span>
+              <span class="detail-value">{{ Math.round(weather.current.pressure) }} hPa</span>
+            </div>
+          </div>
+
+          <div class="detail-card glass-card">
+            <div class="detail-icon">☁️</div>
+            <div class="detail-info">
+              <span class="detail-label">Cloud Cover</span>
+              <span class="detail-value">{{ weather.current.cloudCover }}%</span>
+            </div>
+          </div>
+
+          <div class="detail-card glass-card">
+            <div class="detail-icon">☀️</div>
+            <div class="detail-info">
+              <span class="detail-label">UV Index (Max)</span>
+              <span class="detail-value">
+                @if (weather.daily.length > 0) {
+                  {{ weather.daily[0].uvIndexMax }}
+                } @else {
+                  N/A
+                }
+              </span>
+            </div>
+          </div>
+
+          <div class="detail-card glass-card span-two-cols">
+            <div class="detail-icon">🌅</div>
+            <div class="detail-info sunrise-sunset">
+              <div>
+                <span class="detail-label">Sunrise</span>
+                <span class="detail-value">
+                  @if (weather.daily.length > 0) {
+                    {{ formatTime(weather.daily[0].sunrise) }}
+                  } @else {
+                    N/A
+                  }
+                </span>
+              </div>
+              <div class="divider"></div>
+              <div>
+                <span class="detail-label">Sunset</span>
+                <span class="detail-value">
+                  @if (weather.daily.length > 0) {
+                    {{ formatTime(weather.daily[0].sunset) }}
+                  } @else {
+                    N/A
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Hourly Forecast Carousel (horizontal scroll) -->
+      <section class="hourly-forecast-section">
+        <h2>Hourly Forecast</h2>
+        <div class="hourly-scroll-container">
+          @for (hour of weather.hourly; track hour.time) {
+            <div class="hourly-card glass-card">
+              <span class="hour-time">{{ formatTime(hour.time) }}</span>
+              <span class="hour-icon">{{ weatherService.getWeatherInfo(hour.weatherCode).icon }}</span>
+              <span class="hour-temp">{{ Math.round(hour.temp) }}°</span>
+              <span class="hour-wind">💨 {{ Math.round(hour.windSpeed) }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- SVG Chart Component -->
+      <app-weather-chart [hourly]="weather.hourly"></app-weather-chart>
+
+      <!-- 7-Day Forecast Section -->
+      <section class="daily-forecast-section">
+        <h2>7-Day Forecast</h2>
+        <div class="daily-list">
+          @for (day of weather.daily; track day.date) {
+            <div class="daily-row glass-card">
+              <span class="day-name">{{ getDayName(day.date) }}</span>
+              
+              <div class="day-condition">
+                <span class="day-icon">{{ weatherService.getWeatherInfo(day.weatherCode).icon }}</span>
+                <span class="day-desc">{{ weatherService.getWeatherInfo(day.weatherCode).description }}</span>
+              </div>
+
+              <div class="day-temp-bar">
+                <span class="min-temp">{{ Math.round(day.tempMin) }}°</span>
+                <div class="temp-progress-bar">
+                  <div class="temp-progress-fill" [style.left.%]="20" [style.width.%]="60"></div>
+                </div>
+                <span class="max-temp">{{ Math.round(day.tempMax) }}°</span>
+              </div>
+
+              <div class="day-details-meta">
+                <span class="meta-uv">UV: {{ day.uvIndexMax }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+    </main>
+  } @else {
+    <div class="empty-state-dashboard">
+      <h2>Search for a city or select a favorite to display weather.</h2>
+    </div>
+  }
+</div>

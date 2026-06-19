@@ -1,0 +1,48 @@
+<div class="chart-wrapper">
+  <div class="chart-header">
+    <h3>Hourly Temperature Trend</h3>
+  </div>
+  
+  @if (chartPoints().length > 0) {
+    <div class="svg-container">
+      <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="xMidYMid meet" class="chart-svg">
+        <defs>
+          <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(255, 255, 255, 0.25)" />
+            <stop offset="100%" stop-color="rgba(255, 255, 255, 0)" />
+          </linearGradient>
+        </defs>
+
+        <!-- Grid Lines (horizontal reference lines) -->
+        <line [attr.x1]="paddingX" [attr.y1]="paddingY" [attr.x2]="width - paddingX" [attr.y2]="paddingY" class="grid-line" />
+        <line [attr.x1]="paddingX" [attr.y1]="(height - paddingY * 2) / 2 + paddingY" [attr.x2]="width - paddingX" [attr.y2]="(height - paddingY * 2) / 2 + paddingY" class="grid-line" />
+        <line [attr.x1]="paddingX" [attr.y1]="height - paddingY" [attr.x2]="width - paddingX" [attr.y2]="height - paddingY" class="grid-line" />
+
+        <!-- Gradient Area under the line -->
+        <path [attr.d]="areaPath()" fill="url(#chart-area-grad)" />
+
+        <!-- Main Trend Line -->
+        <path [attr.d]="linePath()" fill="none" stroke="rgba(255, 255, 255, 0.85)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+        <!-- Interactive Points -->
+        @for (p of chartPoints(); track p.x) {
+          <!-- Temperature Text label -->
+          <text [attr.x]="p.x" [attr.y]="p.y - 12" class="temp-label" text-anchor="middle">
+            {{ p.temp }}°
+          </text>
+          
+          <!-- Circle Marker -->
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="5" class="point-marker" />
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="10" class="point-marker-hover" />
+
+          <!-- Time Label -->
+          <text [attr.x]="p.x" [attr.y]="height - 10" class="time-label" text-anchor="middle">
+            {{ p.timeLabel }}
+          </text>
+        }
+      </svg>
+    </div>
+  } @else {
+    <div class="no-data">No hourly forecast data available.</div>
+  }
+</div>

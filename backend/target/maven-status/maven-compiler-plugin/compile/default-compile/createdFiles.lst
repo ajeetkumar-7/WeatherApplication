@@ -1,0 +1,15 @@
+com\weather\app\dto\CityWeatherDto$CurrentForecast.class
+com\weather\app\dto\CityWeatherDto$DailyForecast.class
+com\weather\app\dto\CityWeatherDto.class
+com\weather\app\dto\CityWeatherDto$HourlyForecast.class
+com\weather\app\dto\OpenMeteoResponse.class
+com\weather\app\dto\GeocodingResponse$CitySearchResult.class
+com\weather\app\dto\GeocodingResponse.class
+com\weather\app\dto\OpenMeteoResponse$DailyData.class
+com\weather\app\dto\OpenMeteoResponse$HourlyData.class
+com\weather\app\service\WeatherService.class
+com\weather\app\dto\OpenMeteoResponse$CurrentData.class
+com\weather\app\controller\WeatherController.class
+com\weather\app\WeatherApplication.class
+com\weather\app\config\CorsConfig.class
+com\weather\app\config\CacheConfig.class

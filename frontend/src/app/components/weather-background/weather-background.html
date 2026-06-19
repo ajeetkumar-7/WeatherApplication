@@ -1,0 +1,143 @@
+<div class="weather-bg" [attr.data-scene]="scene()">
+
+  <!-- ====== SUNNY (Day Clear) ====== -->
+  @if (scene() === 'sunny') {
+    <div class="sun-container">
+      <div class="sun">
+        <div class="sun-core"></div>
+        <div class="sun-ray ray-1"></div>
+        <div class="sun-ray ray-2"></div>
+        <div class="sun-ray ray-3"></div>
+        <div class="sun-ray ray-4"></div>
+        <div class="sun-ray ray-5"></div>
+        <div class="sun-ray ray-6"></div>
+        <div class="sun-ray ray-7"></div>
+        <div class="sun-ray ray-8"></div>
+      </div>
+      <div class="sun-glow"></div>
+    </div>
+    <!-- Floating light particles -->
+    <div class="sun-particles">
+      @for (i of [0,1,2,3,4,5,6,7,8,9,10,11]; track i) {
+        <div class="sun-particle" [style.left.%]="(i * 9 + 5) % 100" [style.animationDelay.s]="i * 0.8" [style.animationDuration.s]="6 + (i % 4)"></div>
+      }
+    </div>
+  }
+
+  <!-- ====== NIGHT CLEAR (Moon + Stars) ====== -->
+  @if (scene() === 'night-clear' || scene() === 'night-cloudy') {
+    <div class="night-sky">
+      <!-- Stars -->
+      @for (i of stars; track i) {
+        <div class="star"
+          [style.left]="getStarStyle(i).left"
+          [style.top]="getStarStyle(i).top"
+          [style.width]="getStarStyle(i).width"
+          [style.height]="getStarStyle(i).height"
+          [style.animationDelay]="getStarStyle(i).animationDelay"
+          [style.animationDuration]="getStarStyle(i).animationDuration"
+        ></div>
+      }
+
+      <!-- Shooting star -->
+      <div class="shooting-star"></div>
+      <div class="shooting-star shooting-star-2"></div>
+
+      <!-- Moon -->
+      <div class="moon-container">
+        <div class="moon">
+          <div class="moon-crater crater-1"></div>
+          <div class="moon-crater crater-2"></div>
+          <div class="moon-crater crater-3"></div>
+        </div>
+        <div class="moon-glow"></div>
+      </div>
+    </div>
+  }
+
+  <!-- ====== CLOUDY (Day) ====== -->
+  @if (scene() === 'cloudy' || scene() === 'night-cloudy' || scene() === 'foggy') {
+    <div class="clouds-container">
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      <div class="cloud cloud-3"></div>
+      <div class="cloud cloud-4"></div>
+      <div class="cloud cloud-5"></div>
+    </div>
+  }
+
+  <!-- ====== RAINY ====== -->
+  @if (scene() === 'rainy') {
+    <div class="rain-clouds">
+      <div class="rain-cloud rain-cloud-1"></div>
+      <div class="rain-cloud rain-cloud-2"></div>
+      <div class="rain-cloud rain-cloud-3"></div>
+    </div>
+    <div class="rain-container">
+      @for (i of rainDrops; track i) {
+        <div class="rain-drop"
+          [style.left]="getDropStyle(i).left"
+          [style.animationDelay]="getDropStyle(i).animationDelay"
+          [style.animationDuration]="getDropStyle(i).animationDuration"
+          [style.opacity]="getDropStyle(i).opacity"
+        ></div>
+      }
+    </div>
+    <!-- Ripple effects at bottom -->
+    <div class="rain-ripples">
+      <div class="ripple ripple-1"></div>
+      <div class="ripple ripple-2"></div>
+      <div class="ripple ripple-3"></div>
+      <div class="ripple ripple-4"></div>
+      <div class="ripple ripple-5"></div>
+    </div>
+  }
+
+  <!-- ====== SNOWY ====== -->
+  @if (scene() === 'snowy') {
+    <div class="snow-container">
+      @for (i of snowFlakes; track i) {
+        <div class="snowflake"
+          [style.left]="getSnowStyle(i).left"
+          [style.animationDelay]="getSnowStyle(i).animationDelay"
+          [style.animationDuration]="getSnowStyle(i).animationDuration"
+          [style.width]="getSnowStyle(i).width"
+          [style.height]="getSnowStyle(i).height"
+        ></div>
+      }
+    </div>
+  }
+
+  <!-- ====== STORMY (Rain + Lightning) ====== -->
+  @if (scene() === 'stormy') {
+    <div class="storm-clouds">
+      <div class="rain-cloud storm-cloud-1"></div>
+      <div class="rain-cloud storm-cloud-2"></div>
+      <div class="rain-cloud storm-cloud-3"></div>
+    </div>
+    <div class="rain-container">
+      @for (i of rainDrops; track i) {
+        <div class="rain-drop"
+          [style.left]="getDropStyle(i).left"
+          [style.animationDelay]="getDropStyle(i).animationDelay"
+          [style.animationDuration]="getDropStyle(i).animationDuration"
+          [style.opacity]="getDropStyle(i).opacity"
+        ></div>
+      }
+    </div>
+    <!-- Lightning bolts -->
+    <div class="lightning lightning-1">
+      <svg viewBox="0 0 100 200" class="bolt-svg">
+        <polyline points="50,0 35,80 55,85 30,200" fill="none" stroke="white" stroke-width="3"/>
+      </svg>
+    </div>
+    <div class="lightning lightning-2">
+      <svg viewBox="0 0 100 200" class="bolt-svg">
+        <polyline points="50,0 40,60 60,65 25,200" fill="none" stroke="white" stroke-width="2"/>
+      </svg>
+    </div>
+    <!-- Flash overlay -->
+    <div class="lightning-flash"></div>
+  }
+
+</div>

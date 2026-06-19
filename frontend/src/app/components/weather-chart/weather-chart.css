@@ -1,0 +1,80 @@
+.chart-wrapper {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+  padding: 20px 24px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-glass);
+  margin-top: 24px;
+  width: 100%;
+}
+
+.chart-header h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+.svg-container {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.svg-container::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.chart-svg {
+  display: block;
+  width: 100%;
+  min-width: 550px;
+  height: auto;
+}
+
+.grid-line {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+  stroke-dasharray: 4, 4;
+}
+
+.point-marker {
+  fill: #ffffff;
+  stroke: var(--primary-color, #ff5e62);
+  stroke-width: 2;
+  transition: r 0.2s ease;
+}
+
+.point-marker-hover {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.point-marker-hover:hover + .point-marker,
+.point-marker:hover {
+  r: 7;
+  fill: #ffffff;
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+}
+
+.temp-label {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--text-primary);
+}
+
+.time-label {
+  font-size: 11px;
+  fill: var(--text-secondary);
+  font-weight: 500;
+}
+
+.no-data {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-muted);
+}
