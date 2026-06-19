@@ -204,4 +204,22 @@
       <h2>Search for a city or select a favorite to display weather.</h2>
     </div>
   }
+
+  <!-- Weather Theme / Demo Controller (Float Bottom Right) -->
+  <div class="demo-controller-floating">
+    <div class="demo-controller-title">
+      🎨 Theme Preview
+    </div>
+    <div class="demo-btn-group">
+      <button (click)="weatherService.backgroundOverride.set(null)" [class.active]="weatherService.backgroundOverride() === null" title="Live weather">🔄 Live</button>
+      <button (click)="weatherService.backgroundOverride.set('sunny')" [class.active]="weatherService.backgroundOverride() === 'sunny'">☀️ Day</button>
+      <button (click)="weatherService.backgroundOverride.set('night-clear')" [class.active]="weatherService.backgroundOverride() === 'night-clear'">🌙 Night</button>
+      <button (click)="weatherService.backgroundOverride.set('cloudy')" [class.active]="weatherService.backgroundOverride() === 'cloudy'">☁️ Cloud</button>
+      <button (click)="weatherService.backgroundOverride.set('night-cloudy')" [class.active]="weatherService.backgroundOverride() === 'night-cloudy'">☁️🌙 N-Cloud</button>
+      <button (click)="weatherService.backgroundOverride.set('rainy')" [class.active]="weatherService.backgroundOverride() === 'rainy'">🌧️ Rain</button>
+      <button (click)="weatherService.backgroundOverride.set('stormy')" [class.active]="weatherService.backgroundOverride() === 'stormy'">⛈️ Storm</button>
+      <button (click)="weatherService.backgroundOverride.set('snowy')" [class.active]="weatherService.backgroundOverride() === 'snowy'">❄️ Snow</button>
+      <button (click)="weatherService.backgroundOverride.set('foggy')" [class.active]="weatherService.backgroundOverride() === 'foggy'">🌫️ Fog</button>
+    </div>
+  </div>
 </div>

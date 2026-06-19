@@ -1,14 +1,25 @@
 <div class="search-container">
   <div class="search-input-wrapper">
+    <!-- Geolocation Locate button (Top Left) -->
+    <button (click)="locateMe()" class="locate-btn" title="Locate Me">
+      <svg class="locate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+    </button>
+
+    <!-- Search Icon -->
     <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="11" cy="11" r="8"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
     
+    <!-- Search Input -->
     <input 
       type="text" 
       [value]="query()" 
       (input)="onInput($event)"
+      (keydown)="onKeyDown($event)"
       (focus)="suggestions().length > 0 && showSuggestions.set(true)"
       placeholder="Search for cities..."
       class="search-input"
@@ -19,10 +30,15 @@
     }
   </div>
 
+  <!-- Suggestions Dropdown with Keyboard selection -->
   @if (showSuggestions()) {
     <ul class="suggestions-list">
-      @for (city of suggestions(); track city.latitude + ',' + city.longitude) {
-        <li (click)="selectCity(city)" class="suggestion-item">
+      @for (city of suggestions(); track $index) {
+        <li (mousedown)="selectCity(city); $event.stopPropagation()" 
+            (click)="selectCity(city); $event.stopPropagation()"
+            (mouseenter)="focusedIndex.set($index)"
+            class="suggestion-item" 
+            [class.focused]="$index === focusedIndex()">
           <span class="city-name">{{ city.name }}</span>
           <span class="city-details">
             @if (city.admin1) {

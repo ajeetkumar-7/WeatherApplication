@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, tap, switchMap } from 'rxjs/operators';
 
 export interface CitySearchResult {
   name: string;
@@ -68,6 +68,7 @@ export class WeatherService {
   favorites = signal<CitySearchResult[]>([]);
   isLoading = signal<boolean>(false);
   errorMsg = signal<string | null>(null);
+  backgroundOverride = signal<string | null>(null);
 
   constructor() {
     this.loadFavorites();
@@ -90,13 +91,15 @@ export class WeatherService {
     this.errorMsg.set(null);
     this.currentCity.set(city);
 
-    this.http.get<CityWeatherDto>(`${this.apiUrl}/weather`, {
-      params: {
-        latitude: city.latitude.toString(),
-        longitude: city.longitude.toString(),
-        timezone: city.timezone
-      }
-    }).pipe(
+    const params: any = {
+      latitude: city.latitude.toString(),
+      longitude: city.longitude.toString()
+    };
+    if (city.timezone) {
+      params.timezone = city.timezone;
+    }
+
+    this.http.get<CityWeatherDto>(`${this.apiUrl}/weather`, { params }).pipe(
       tap(weather => {
         this.currentWeather.set(weather);
         this.isLoading.set(false);
@@ -109,6 +112,65 @@ export class WeatherService {
         return of(null);
       })
     ).subscribe();
+  }
+
+  fetchWeatherForCoordinates(lat: number, lon: number) {
+    this.isLoading.set(true);
+    this.errorMsg.set(null);
+
+    // Default placeholder in case reverse geocode fails
+    const fallbackCity: CitySearchResult = {
+      name: 'Current Location',
+      latitude: lat,
+      longitude: lon,
+      country: '',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+    this.currentCity.set(fallbackCity);
+
+    // Fetch locality and country details via open reverse geocoding client
+    this.http.get<any>(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`)
+      .pipe(
+        tap(res => {
+          if (res) {
+            const resolvedCity: CitySearchResult = {
+              name: res.city || res.locality || 'Current Location',
+              latitude: lat,
+              longitude: lon,
+              country: res.countryName || '',
+              admin1: res.principalSubdivision || undefined,
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            this.currentCity.set(resolvedCity);
+          }
+        }),
+        catchError(err => {
+          console.warn('Reverse geocoding failed, using fallback name:', err);
+          return of(null);
+        }),
+        switchMap(() => {
+          const city = this.currentCity() || fallbackCity;
+          const params: any = {
+            latitude: lat.toString(),
+            longitude: lon.toString()
+          };
+          if (city.timezone) {
+            params.timezone = city.timezone;
+          }
+          return this.http.get<CityWeatherDto>(`${this.apiUrl}/weather`, { params });
+        }),
+        tap(weather => {
+          this.currentWeather.set(weather);
+          this.isLoading.set(false);
+        }),
+        catchError(err => {
+          console.error('Error fetching weather for coordinates:', err);
+          this.errorMsg.set('Failed to load weather for your location.');
+          this.currentWeather.set(null);
+          this.isLoading.set(false);
+          return of(null);
+        })
+      ).subscribe();
   }
 
   // Favorites Management
@@ -171,8 +233,8 @@ export class WeatherService {
           icon: isDay ? '☀️' : '🌙',
           class: isDay ? 'sunny-theme' : 'night-theme',
           bgGradient: isDay
-            ? 'linear-gradient(135deg, #FF9900 0%, #FF5E62 100%)'
-            : 'linear-gradient(135deg, #0c1445 0%, #1a1a4e 50%, #0d0d2b 100%)'
+            ? 'linear-gradient(160deg, #1ca7ec 0%, #4adede 25%, #7ce5f0 50%, #f9d423 85%, #ff6b35 100%)'
+            : 'linear-gradient(160deg, #020111 0%, #0a0e2a 30%, #191970 60%, #1a1145 100%)'
         };
       case 1:
       case 2:
@@ -182,8 +244,8 @@ export class WeatherService {
           icon: code === 1 ? (isDay ? '🌤️' : '🌙') : code === 2 ? '⛅' : '☁️',
           class: isDay ? 'cloudy-theme' : 'night-cloudy-theme',
           bgGradient: isDay
-            ? 'linear-gradient(135deg, #5D8AA8 0%, #4682B4 100%)'
-            : 'linear-gradient(135deg, #0f1b3d 0%, #1c2951 50%, #141e3d 100%)'
+            ? 'linear-gradient(160deg, #3a8fd8 0%, #87afc7 40%, #9fb8c4 60%, #c4cfd6 100%)'
+            : 'linear-gradient(160deg, #070b1a 0%, #111d3a 40%, #1b2a50 70%, #0f1628 100%)'
         };
       case 45:
       case 48:
@@ -192,8 +254,8 @@ export class WeatherService {
           icon: '🌫️',
           class: 'foggy-theme',
           bgGradient: isDay
-            ? 'linear-gradient(135deg, #708090 0%, #A9A9A9 100%)'
-            : 'linear-gradient(135deg, #2c3e50 0%, #4a5568 100%)'
+            ? 'linear-gradient(160deg, #8e9eab 0%, #b8c6db 40%, #c9d6df 70%, #eef2f3 100%)'
+            : 'linear-gradient(160deg, #1a1f2e 0%, #2d3548 40%, #3d4558 100%)'
         };
       case 51:
       case 53:
@@ -205,8 +267,8 @@ export class WeatherService {
           icon: '🌧️',
           class: 'rainy-theme',
           bgGradient: isDay
-            ? 'linear-gradient(135deg, #4a6fa5 0%, #6b8cae 100%)'
-            : 'linear-gradient(135deg, #1a2a4a 0%, #2c3e60 100%)'
+            ? 'linear-gradient(160deg, #4a6d8c 0%, #5f8a9e 35%, #7fa3b5 65%, #94b3c4 100%)'
+            : 'linear-gradient(160deg, #0a1628 0%, #152238 40%, #1e3050 100%)'
         };
       case 61:
       case 63:
@@ -221,8 +283,8 @@ export class WeatherService {
           icon: '🌧️',
           class: 'rainy-theme',
           bgGradient: isDay
-            ? 'linear-gradient(135deg, #3a5f8a 0%, #556b82 100%)'
-            : 'linear-gradient(135deg, #101d30 0%, #1a2d45 100%)'
+            ? 'linear-gradient(160deg, #3b5a7c 0%, #4a6e8c 30%, #637f94 60%, #7a96a8 100%)'
+            : 'linear-gradient(160deg, #080e1a 0%, #101c30 35%, #1a2d48 70%, #0d1520 100%)'
         };
       case 71:
       case 73:
@@ -235,8 +297,8 @@ export class WeatherService {
           icon: '❄️',
           class: 'snowy-theme',
           bgGradient: isDay
-            ? 'linear-gradient(135deg, #bcc6d0 0%, #8faabe 100%)'
-            : 'linear-gradient(135deg, #1a2340 0%, #2a3550 100%)'
+            ? 'linear-gradient(160deg, #a8c0d0 0%, #c5d5e0 30%, #dce6ec 60%, #e8eff4 100%)'
+            : 'linear-gradient(160deg, #121a2e 0%, #1e2a42 40%, #2a3856 100%)'
         };
       case 95:
       case 96:
@@ -245,7 +307,7 @@ export class WeatherService {
           description: 'Thunderstorm',
           icon: '⛈️',
           class: 'stormy-theme',
-          bgGradient: 'linear-gradient(135deg, #0F2027 0%, #18303a 50%, #1a2f3f 100%)'
+          bgGradient: 'linear-gradient(160deg, #0a0a12 0%, #1a1030 25%, #2d1b4e 50%, #1a1530 75%, #0a0a15 100%)'
         };
       default:
         return {
@@ -253,9 +315,32 @@ export class WeatherService {
           icon: '🌡️',
           class: 'default-theme',
           bgGradient: isDay
-            ? 'linear-gradient(135deg, #3A6073 0%, #3A7BD5 100%)'
-            : 'linear-gradient(135deg, #0c1445 0%, #1a1a4e 100%)'
+            ? 'linear-gradient(160deg, #2980b9 0%, #6dd5fa 50%, #ffffff 100%)'
+            : 'linear-gradient(160deg, #020111 0%, #0a0e2a 50%, #191970 100%)'
         };
+    }
+  }
+
+  getOverrideGradient(override: string): string {
+    switch (override) {
+      case 'sunny':
+        return 'linear-gradient(160deg, #1ca7ec 0%, #4adede 25%, #7ce5f0 50%, #f9d423 85%, #ff6b35 100%)';
+      case 'night-clear':
+        return 'linear-gradient(160deg, #020111 0%, #0a0e2a 30%, #191970 60%, #1a1145 100%)';
+      case 'cloudy':
+        return 'linear-gradient(160deg, #3a8fd8 0%, #87afc7 40%, #9fb8c4 60%, #c4cfd6 100%)';
+      case 'night-cloudy':
+        return 'linear-gradient(160deg, #070b1a 0%, #111d3a 40%, #1b2a50 70%, #0f1628 100%)';
+      case 'rainy':
+        return 'linear-gradient(160deg, #080e1a 0%, #101c30 35%, #1a2d48 70%, #0d1520 100%)';
+      case 'snowy':
+        return 'linear-gradient(160deg, #121a2e 0%, #1e2a42 40%, #2a3856 100%)';
+      case 'stormy':
+        return 'linear-gradient(160deg, #0a0a12 0%, #1a1030 25%, #2d1b4e 50%, #1a1530 75%, #0a0a15 100%)';
+      case 'foggy':
+        return 'linear-gradient(160deg, #1a1f2e 0%, #2d3548 40%, #3d4558 100%)';
+      default:
+        return 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
     }
   }
 }

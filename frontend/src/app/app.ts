@@ -15,6 +15,11 @@ export class App {
 
   // Dynamic gradient based on current weather code
   backgroundStyle = computed(() => {
+    const override = this.weatherService.backgroundOverride();
+    if (override) {
+      return this.weatherService.getOverrideGradient(override);
+    }
+
     const weather = this.weatherService.currentWeather();
     if (!weather || !weather.current) {
       // Default slate blue gradient

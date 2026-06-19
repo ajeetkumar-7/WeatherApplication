@@ -1,118 +1,434 @@
-.favorites-wrapper {
-  margin-bottom: 24px;
+/* ═══════════════════════════════════════════════════════════════
+   Favorite Cities · Premium Weather App
+   Hand-crafted with layered glass, glow accents & fluid motion
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes ─────────────────────────────────────────────── */
+
+@keyframes card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.92);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 0.7;
+    transform: translateY(-3px) scale(1.01);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
 }
 
+@keyframes active-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 12px -2px var(--accent-glow),
+      0 0 28px -6px var(--accent-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 18px 0px var(--accent-glow),
+      0 0 40px -4px var(--accent-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+@keyframes border-glow-sweep {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes spin-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.3);
+  }
+  70% {
+    opacity: 0.8;
+    transform: rotate(15deg) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes empty-pulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.015);
+  }
+}
+
+/* ── Wrapper ───────────────────────────────────────────────── */
+
+.favorites-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 0.25rem 0;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+
 .favorites-header h3 {
-  margin: 0 0 12px 0;
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.65rem 0.25rem;
+  padding-bottom: 0.35rem;
+  position: relative;
+  display: inline-block;
+  cursor: default;
+  transition:
+    letter-spacing 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.4s ease;
 }
+
+.favorites-header h3::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-color) 0%,
+    transparent 100%
+  );
+  border-radius: 1px;
+  opacity: 0.45;
+  transform: scaleX(0.6);
+  transform-origin: left center;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s ease;
+}
+
+.favorites-header h3:hover {
+  letter-spacing: 0.18em;
+  color: var(--text-primary);
+}
+
+.favorites-header h3:hover::after {
+  transform: scaleX(1);
+  opacity: 0.75;
+}
+
+/* ── Scrolling List with Gradient Edge Masks ───────────────── */
 
 .favorites-list {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
   overflow-x: auto;
-  padding: 4px 4px 12px 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  overflow-y: hidden;
+  padding: 0.5rem 1.5rem 0.75rem 0.25rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+
+  /* Gradient fade masks on scroll edges */
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent 0%,
+      black 4%,
+      black 92%,
+      transparent 100%
+    );
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      transparent 0%,
+      black 4%,
+      black 92%,
+      transparent 100%
+    );
 }
 
+/* Subtle custom scrollbar */
 .favorites-list::-webkit-scrollbar {
-  height: 6px;
-}
-
-.favorites-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  height: 3px;
 }
 
 .favorites-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
+.favorites-list::-webkit-scrollbar-thumb {
+  background: var(--border-glass);
+  border-radius: 4px;
+}
+
+.favorites-list::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* ── Favorite Card ─────────────────────────────────────────── */
+
 .favorite-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-width: 160px;
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 135px;
+  max-width: 175px;
+  padding: 0.85rem 0.9rem 0.95rem;
   background: var(--bg-glass);
   border: 1px solid var(--border-glass);
-  border-radius: 16px;
-  padding: 12px 16px;
+  border-radius: 14px;
   cursor: pointer;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--shadow-glass);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+
+  /* 3D transform setup */
+  transform-style: preserve-3d;
+  perspective: 600px;
+  transform: translateY(0) rotateX(0deg);
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    background 0.35s ease;
+
+  /* Entrance animation */
+  animation: card-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* Base shadow */
+  box-shadow:
+    var(--shadow-glass),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
+
+/* Glowing bottom border — idle state (subtle) */
+.favorite-card::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 12%;
+  width: 76%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-color) 30%,
+    var(--accent-glow) 50%,
+    var(--accent-color) 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition:
+    opacity 0.4s ease,
+    width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Staggered Entry Delays (nth-child) ────────────────────── */
+
+.favorite-card:nth-child(1)  { animation-delay: 0ms;   }
+.favorite-card:nth-child(2)  { animation-delay: 60ms;  }
+.favorite-card:nth-child(3)  { animation-delay: 120ms; }
+.favorite-card:nth-child(4)  { animation-delay: 180ms; }
+.favorite-card:nth-child(5)  { animation-delay: 240ms; }
+.favorite-card:nth-child(6)  { animation-delay: 300ms; }
+.favorite-card:nth-child(7)  { animation-delay: 360ms; }
+.favorite-card:nth-child(8)  { animation-delay: 420ms; }
+.favorite-card:nth-child(9)  { animation-delay: 480ms; }
+.favorite-card:nth-child(10) { animation-delay: 540ms; }
+
+/* ── Card Hover — 3D Lift + Glow Border ────────────────────── */
 
 .favorite-card:hover {
+  transform: translateY(-6px) rotateX(2.5deg);
   background: var(--bg-glass-focus);
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 24px -4px rgba(0, 0, 0, 0.25),
+    0 0 14px -3px var(--accent-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.favorite-card.active {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.05);
+.favorite-card:hover::after {
+  opacity: 0.9;
+  left: 6%;
+  width: 88%;
+  animation: border-glow-sweep 2.4s linear infinite;
 }
+
+/* ── Active Card — Pulsing Glow ────────────────────────────── */
+
+.favorite-card.active {
+  background: var(--bg-glass-focus);
+  border-color: var(--accent-color);
+  animation:
+    card-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both,
+    active-pulse 3s ease-in-out infinite;
+}
+
+.favorite-card.active::after {
+  opacity: 0.75;
+  left: 8%;
+  width: 84%;
+}
+
+.favorite-card.active:hover {
+  animation:
+    active-pulse 2.2s ease-in-out infinite;
+}
+
+/* ── Card Info ─────────────────────────────────────────────── */
 
 .card-info {
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
+  position: relative;
+  z-index: 1;
 }
 
 .city-name {
+  font-size: 0.88rem;
   font-weight: 600;
-  font-size: 0.95rem;
   color: var(--text-primary);
+  line-height: 1.25;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 110px;
+  transition: color 0.3s ease;
+}
+
+.favorite-card:hover .city-name {
+  color: var(--accent-color);
 }
 
 .country-name {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.3s ease;
 }
 
+.favorite-card:hover .country-name {
+  color: var(--text-secondary);
+}
+
+/* ── Remove Button — Spin-In on Card Hover ─────────────────── */
+
 .remove-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 60, 60, 0.08);
+  color: var(--text-muted);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  /* Hidden by default */
   opacity: 0;
+  transform: rotate(-180deg) scale(0.3);
+  pointer-events: none;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
+/* Spin-in when card is hovered */
 .favorite-card:hover .remove-btn {
   opacity: 1;
+  transform: rotate(0deg) scale(1);
+  pointer-events: auto;
+  animation: spin-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .remove-btn:hover {
-  background: rgba(255, 94, 98, 0.2);
-  color: #ff5e62;
+  background: rgba(255, 60, 60, 0.22);
+  color: #ff4d4d;
+  box-shadow: 0 0 10px -2px rgba(255, 60, 60, 0.35);
+}
+
+.remove-btn:active {
+  transform: rotate(0deg) scale(0.88);
 }
 
 .trash-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
+  stroke-width: 2;
+  transition: transform 0.2s ease;
 }
 
+.remove-btn:hover .trash-icon {
+  transform: scale(1.12);
+}
+
+/* ── Empty State ───────────────────────────────────────────── */
+
 .empty-state {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.75rem 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-align: center;
+  border: 1px dashed var(--border-glass);
+  border-radius: 14px;
+  background: var(--bg-glass);
+  animation: empty-pulse 3.5s ease-in-out infinite;
+  cursor: default;
+  user-select: none;
+}
+
+/* ── Reduced Motion Accessibility ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .favorite-card,
+  .favorite-card.active,
+  .empty-state {
+    animation: none;
+  }
+
+  .favorite-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .favorite-card:hover::after {
+    animation: none;
+  }
+
+  .favorite-card:hover .remove-btn {
+    animation: none;
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
 }

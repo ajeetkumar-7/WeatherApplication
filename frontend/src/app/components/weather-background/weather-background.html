@@ -1,7 +1,7 @@
-<div class="weather-bg" [attr.data-scene]="scene()">
+<div class="weather-bg" [attr.data-scene]="scene()" [attr.data-is-day]="!isNight()">
 
-  <!-- ====== SUNNY (Day Clear) ====== -->
-  @if (scene() === 'sunny') {
+  <!-- ====== SUNNY / DAY SUN LAYER ====== -->
+  @if (showSun()) {
     <div class="sun-container">
       <div class="sun">
         <div class="sun-core"></div>
@@ -19,23 +19,23 @@
     <!-- Floating light particles -->
     <div class="sun-particles">
       @for (i of [0,1,2,3,4,5,6,7,8,9,10,11]; track i) {
-        <div class="sun-particle" [style.left.%]="(i * 9 + 5) % 100" [style.animationDelay.s]="i * 0.8" [style.animationDuration.s]="6 + (i % 4)"></div>
+        <div class="sun-particle" [style.left.%]="(i * 9 + 5) % 100" [style.animation-delay.s]="i * 0.8" [style.animation-duration.s]="6 + (i % 4)"></div>
       }
     </div>
   }
 
-  <!-- ====== NIGHT CLEAR (Moon + Stars) ====== -->
-  @if (scene() === 'night-clear' || scene() === 'night-cloudy') {
+  <!-- ====== NIGHT SKY LAYER (Moon + Stars) ====== -->
+  @if (isNight()) {
     <div class="night-sky">
       <!-- Stars -->
-      @for (i of stars; track i) {
+      @for (star of stars; track $index) {
         <div class="star"
-          [style.left]="getStarStyle(i).left"
-          [style.top]="getStarStyle(i).top"
-          [style.width]="getStarStyle(i).width"
-          [style.height]="getStarStyle(i).height"
-          [style.animationDelay]="getStarStyle(i).animationDelay"
-          [style.animationDuration]="getStarStyle(i).animationDuration"
+          [style.left]="star.left"
+          [style.top]="star.top"
+          [style.width]="star.width"
+          [style.height]="star.height"
+          [style.animation-delay]="star.delay"
+          [style.animation-duration]="star.duration"
         ></div>
       }
 
@@ -55,8 +55,8 @@
     </div>
   }
 
-  <!-- ====== CLOUDY (Day) ====== -->
-  @if (scene() === 'cloudy' || scene() === 'night-cloudy' || scene() === 'foggy') {
+  <!-- ====== CLOUDS LAYER ====== -->
+  @if (hasClouds()) {
     <div class="clouds-container">
       <div class="cloud cloud-1"></div>
       <div class="cloud cloud-2"></div>
@@ -66,20 +66,20 @@
     </div>
   }
 
-  <!-- ====== RAINY ====== -->
-  @if (scene() === 'rainy') {
+  <!-- ====== RAINY LAYER ====== -->
+  @if (hasRain()) {
     <div class="rain-clouds">
       <div class="rain-cloud rain-cloud-1"></div>
       <div class="rain-cloud rain-cloud-2"></div>
       <div class="rain-cloud rain-cloud-3"></div>
     </div>
     <div class="rain-container">
-      @for (i of rainDrops; track i) {
+      @for (drop of rainDrops; track $index) {
         <div class="rain-drop"
-          [style.left]="getDropStyle(i).left"
-          [style.animationDelay]="getDropStyle(i).animationDelay"
-          [style.animationDuration]="getDropStyle(i).animationDuration"
-          [style.opacity]="getDropStyle(i).opacity"
+          [style.left]="drop.left"
+          [style.animation-delay]="drop.delay"
+          [style.animation-duration]="drop.duration"
+          [style.opacity]="drop.opacity"
         ></div>
       }
     </div>
@@ -93,38 +93,23 @@
     </div>
   }
 
-  <!-- ====== SNOWY ====== -->
-  @if (scene() === 'snowy') {
+  <!-- ====== SNOWY LAYER ====== -->
+  @if (hasSnow()) {
     <div class="snow-container">
-      @for (i of snowFlakes; track i) {
+      @for (flake of snowFlakes; track $index) {
         <div class="snowflake"
-          [style.left]="getSnowStyle(i).left"
-          [style.animationDelay]="getSnowStyle(i).animationDelay"
-          [style.animationDuration]="getSnowStyle(i).animationDuration"
-          [style.width]="getSnowStyle(i).width"
-          [style.height]="getSnowStyle(i).height"
+          [style.left]="flake.left"
+          [style.animation-delay]="flake.delay"
+          [style.animation-duration]="flake.duration"
+          [style.width]="flake.width"
+          [style.height]="flake.height"
         ></div>
       }
     </div>
   }
 
-  <!-- ====== STORMY (Rain + Lightning) ====== -->
-  @if (scene() === 'stormy') {
-    <div class="storm-clouds">
-      <div class="rain-cloud storm-cloud-1"></div>
-      <div class="rain-cloud storm-cloud-2"></div>
-      <div class="rain-cloud storm-cloud-3"></div>
-    </div>
-    <div class="rain-container">
-      @for (i of rainDrops; track i) {
-        <div class="rain-drop"
-          [style.left]="getDropStyle(i).left"
-          [style.animationDelay]="getDropStyle(i).animationDelay"
-          [style.animationDuration]="getDropStyle(i).animationDuration"
-          [style.opacity]="getDropStyle(i).opacity"
-        ></div>
-      }
-    </div>
+  <!-- ====== STORMY / LIGHTNING LAYER ====== -->
+  @if (hasLightning()) {
     <!-- Lightning bolts -->
     <div class="lightning lightning-1">
       <svg viewBox="0 0 100 200" class="bolt-svg">
